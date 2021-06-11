@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,  HostListener } from '@angular/core';
 import { FirbaseAuthService } from "../../services/firebase/firbase-auth.service";
 import { FirestoreService } from '../../services/firebase/firestore.service';
 import $ from 'jquery';
@@ -45,12 +45,31 @@ export class DashbordComponent implements OnInit {
 		this.canvasLoaded = true;
   	})
   }
+
+  onResize(event) {
+	this.resizeCanvas()
+	    // const outerCanvasContainer = $('.fabric-canvas-wrapper')[0];
+	    // const ratio = this.canvasWrapper.getWidth() / this.canvasWrapper.getHeight();
+	    // const containerWidth   = outerCanvasContainer.clientWidth;
+	    // const containerHeight  = outerCanvasContainer.clientHeight;
+	    // console.log(containerWidth)
+	    // console.log(containerHeight)
+	    // this.canvasWrapper.getWidth({width: containerWidth, height: containerWidth / ratio});
+
+	// $(window).resize(resizeCanvas);
+  }
  
   public loadCanvas(_canvas?:any){
 	this.canvasWrapper = new fabric.Canvas('fabric-canvas');
+		this.canvasWrapper.setHeight(700);
+		this.canvasWrapper.setWidth(1400);
 	var drawingColorEl = document.getElementById('drawing-color'),
 	      drawingLineWidthEl = document.getElementById('drawing-line-width'),
 	      drawingShadowWidth = document.getElementById('drawing-shadow-width');
+	      this.canvasWrapper.isDrawingMode = true;
+
+
+	  
 
 	setTimeout(()=>{
 		this.canvasWrapper.isDrawingMode = true;
@@ -147,7 +166,12 @@ export class DashbordComponent implements OnInit {
 						top: 0,
 						angle: 0,
 						padding: 0,
-						cornersize: 0,
+						cornersize: 10,
+						centeredRotation: true,
+                        centeredScaling: true,                        
+                        scaleToWidth:100,
+                        scaleX : 1,
+                        scaleY : 1
 					});
 					this.canvasWrapper.add(image);
 					this.canvasWrapper.isDrawingMode = false;
@@ -159,7 +183,6 @@ export class DashbordComponent implements OnInit {
 	var img = new Image();
 	var texturePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 	texturePatternBrush.source = img;
-
 	/* Select Drawing Option */
 	document.getElementById('drawing-mode-selector').addEventListener('change', () => {
 		var selectedCountry = $(this).children("option:selected").val();
@@ -238,4 +261,19 @@ export class DashbordComponent implements OnInit {
 	this.canvasLoaded = false;
 	this.getCanvas(this.user.uid)
   }
+
+  resizeCanvas() {
+	    const outerCanvasContainer = $('.fabric-canvas-wrapper')[0];
+	    
+	    const ratio = this.canvasWrapper.getWidth() / this.canvasWrapper.getHeight();
+	    const containerWidth   = outerCanvasContainer.clientWidth;
+	    const containerHeight  = outerCanvasContainer.clientHeight;
+
+	    const scale = containerWidth / this.canvasWrapper.getWidth();
+	    const zoom  = this.canvasWrapper.getZoom() * scale;
+	    this.canvasWrapper.setDimensions({width: containerWidth, height: containerWidth / ratio});
+	    this.canvasWrapper.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
+	}
+
+	// $(window).resize(resizeCanvas);
 }

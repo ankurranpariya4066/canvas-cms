@@ -1,0 +1,13 @@
+
+  @media only screen and (max-width: 1024px) {
+
+    .form-group{
+      width: 100% !important;
+    }
+    .label-responsive{
+      width: 50% !important;
+    }
+    .btn{
+      width: 100% !important;
+    }
+  }

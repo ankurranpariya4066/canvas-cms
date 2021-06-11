@@ -1,3 +1,5 @@
+<div (window:resize)="onResize($event)"></div>
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="container-fluid">
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,7 +19,7 @@
 	<div class="row p-3">
 		<div class="col-12" style="box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);">
 			<div class="row p-2">
-				<div class="col-6 d-flex align-items-center justify-content-between">
+				<div class="col-lg-6 col-md-12 col-sm-12 d-md-block d-lg-flex align-items-center justify-content-between">
 					<div class="form-group w-25">
 						<label for="drawing-mode-selector">Mode</label>
 						<select class="form-control" id="drawing-mode-selector">
@@ -33,19 +35,19 @@
 						</select>
 					</div>
 					<div>
-						<label class="w-100" for="drawing-line-width">Line width:</label>
+						<label class="w-100 label-responsive" for="drawing-line-width">Line width:</label>
 						<input type="range" value="30" min="0" max="150" id="drawing-line-width"><br>
 					</div>
 					<div>
-						<label class="w-100" for="drawing-color">Line color:</label>
+						<label class="w-100 label-responsive" for="drawing-color">Line color:</label>
 						<input type="color" id="drawing-color"><br>
 					</div>
 					<div>
-						<label class="w-100" for="drawing-shadow-width">Line shadow width:</label>
+						<label class="w-100 label-responsive" for="drawing-shadow-width">Line shadow width:</label>
 						<input type="range" value="0" min="0" max="50" id="drawing-shadow-width"><br>
 					</div>
 				</div>
-				<div class="col-6 d-flex align-items-center justify-content-end">
+				<div class="col-lg-6 col-md-12 col-sm-12 d-md-block d-lg-flex align-items-center justify-content-end">
 					<div style="margin-right:10px">
 						<input class="form-control" type="file" id="imgLoader"> 	
 					</div>
@@ -61,10 +63,12 @@
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-9">
-			<canvas style="border: 1px solid grey; margin-left:20px;" height="700" width="1400" id="fabric-canvas"></canvas>
+		<div class="col-lg-9 col-sm-12">
+			<div class="fabric-canvas-wrapper">
+				<canvas style="border: 1px solid grey; margin-left:20px;" id="fabric-canvas"></canvas>
+			</div>
 		</div>
-		<div class="col-3">
+		<div class="col-lg-3 col-md-12 col-sm-12">
 			<div class="card">
 				<div class="card-header text-bold">
 					Shared With Me
