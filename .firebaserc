@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "th-test-a8c49": {
+      "hosting": {
+        "tour-of-heroes": [
+          "th-test-a8c49"
+        ]
+      }
+    }
+  }
+}

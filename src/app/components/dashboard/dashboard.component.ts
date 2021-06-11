@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FirbaseAuthService } from "../../services/firebase/firbase-auth.service";
+import { FirestoreService } from '../../services/firebase/firestore.service';
 import $ from 'jquery';
 import { fabric } from "fabric";
 import { NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
@@ -12,11 +13,16 @@ import { NgbModal, ModalDismissReasons} from '@ng-bootstrap/ng-bootstrap';
 })
 export class DashbordComponent implements OnInit {
   closeResult: string;
+  userData:any;
+  allCanvas:any;
+  jsonCanvas:any;
+  mainCanvase:any;
 
-  constructor(public authService: FirbaseAuthService, private modalService: NgbModal) { }
+  constructor(public authService: FirbaseAuthService, private modalService: NgbModal, public firestoreService: FirestoreService) { }
 
   ngOnInit(): void {
-  	this.canvasLaod()
+    this.userData = JSON.parse(localStorage.getItem('user'));
+  	this.getCanvas()
   }
 
   open(content) {
@@ -25,6 +31,16 @@ export class DashbordComponent implements OnInit {
     }, (reason) => {
       this.closeResult = `Dismissed ${this.getDismissReason(reason)}`;
     });
+  }
+
+  getCanvas() {
+  	this.firestoreService.getCanvas(this.userData.uid).subscribe((data) => {
+  		this.allCanvas = data;
+  		this.jsonCanvas = JSON.parse(this.allCanvas.canvas);
+		this.mainCanvase = JSON.stringify(this.jsonCanvas);  
+  		this.canvasLaod()			
+  	})
+
   }
   
   private getDismissReason(reason: any): string {
@@ -39,13 +55,17 @@ export class DashbordComponent implements OnInit {
  
 
   canvasLaod(){
+  	const _self = this;
 	var canvas = new fabric.Canvas('c');
 	var drawingColorEl = document.getElementById('drawing-color'),
 	      drawingLineWidthEl = document.getElementById('drawing-line-width'),
 	      drawingShadowWidth = document.getElementById('drawing-shadow-width');
 	  canvas.isDrawingMode = true;
 
-	  if (fabric.PatternBrush) {
+
+
+
+	if (fabric.PatternBrush) {
 	    var vLinePatternBrush = new fabric.PatternBrush(canvas);
 	    vLinePatternBrush.getPatternSrc = function() {
 
@@ -63,6 +83,8 @@ export class DashbordComponent implements OnInit {
 
 	      return patternCanvas;
 	    };
+
+
 
 	    var hLinePatternBrush = new fabric.PatternBrush(canvas);
 	    hLinePatternBrush.getPatternSrc = function() {
@@ -122,104 +144,109 @@ export class DashbordComponent implements OnInit {
 	      return patternCanvas;
 	    };
 
-		document.getElementById('imgLoader').onchange = function(event) {
-			 const target= event.target as HTMLInputElement;
-  			 const file: File = (target.files as FileList)[0];
-			
-				var reader = new FileReader();
-			    reader.onload = function (event) { 
-			    	console.log('fdsf');
-					var img = new Image();
-					img.src  =  event.target.result.toString();
 
-					img.onload = function(){
-						var image = new fabric.Image(img);
-						image.set({
-			                left: 250,
-			                top: 250,
-			                angle: 20,
-			                padding: 10,
-			                cornersize: 10
-			            });
-			            canvas.add(image);
-			            canvas.isDrawingMode = false;
+	    /* Render firebase Canvase JSON*/
+	    
+			canvas.loadFromJSON(_self.mainCanvase, canvas.renderAll.bind(canvas), function(o, object) {
+			    fabric.log(o, object);
+			})
+
+
+		/* Custom Image Upload In Canvas */	
+
+			document.getElementById('imgLoader').onchange = function(event) {
+				 const target= event.target as HTMLInputElement;
+	  			 const file: File = (target.files as FileList)[0];
+				
+					var reader = new FileReader();
+				    reader.onload = function (event) { 				    
+						var img = new Image();
+						img.src  =  event.target.result.toString();
+
+						img.onload = function(){
+							var image = new fabric.Image(img);
+							image.set({
+				                left: 250,
+				                top: 250,
+				                angle: 20,
+				                padding: 10,
+				                cornersize: 10
+				            });
+				            canvas.add(image);
+				            canvas.isDrawingMode = false;
+						}
 					}
-				}
-				reader.readAsDataURL(file);
-				console.log(JSON.stringify(canvas));
-		}  
+					reader.readAsDataURL(file);
+				   _self.firestoreService.storeCanvas(_self.userData.uid, (JSON.stringify(canvas)), _self.userData.email);
+			}  
 
-	    var img = new Image();
+		    var img = new Image();
 
-	    var texturePatternBrush = new fabric.PatternBrush(canvas);
-	    texturePatternBrush.source = img;
+		    var texturePatternBrush = new fabric.PatternBrush(canvas);
+		    texturePatternBrush.source = img;
 
+	}
 
-	  }
+		/* Select Drawing Option */
 
-	    document.getElementById('drawing-mode-selector').addEventListener('change', function() {
-	    	var selectedCountry = $(this).children("option:selected").val();
+		    document.getElementById('drawing-mode-selector').addEventListener('change', function() {
+		    	var selectedCountry = $(this).children("option:selected").val();
 
-		    if (selectedCountry === 'hline') {
-		      canvas.freeDrawingBrush = vLinePatternBrush;
+			    if (selectedCountry === 'hline') {
+			      canvas.freeDrawingBrush = vLinePatternBrush;
+			    }
+			    else if (selectedCountry === 'vline') {
+			      canvas.freeDrawingBrush = hLinePatternBrush;
+			    }
+			    else if (selectedCountry === 'square') {
+			      canvas.freeDrawingBrush = squarePatternBrush;
+			    }
+			    else if (selectedCountry === 'diamond') {
+			      canvas.freeDrawingBrush = diamondPatternBrush;
+			    }
+			    else if (selectedCountry === 'texture') {
+			      canvas.freeDrawingBrush = texturePatternBrush;
+			    }
+			    else {
+			      canvas.freeDrawingBrush = new fabric[selectedCountry + 'Brush'](canvas);
+			    }
+
+			    if (canvas.freeDrawingBrush) {
+			      canvas.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;;
+			      canvas.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
+			      canvas.freeDrawingBrush.shadowBlur = parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
+			    }
+		    });
+
+			drawingColorEl.onchange = function() {
+			   canvas.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;			   
+			   _self.firestoreService.storeCanvas(_self.userData.uid, (JSON.stringify(canvas)), _self.userData.email);
+
+			};
+
+			drawingLineWidthEl.onchange = function() {
+			   canvas.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
+			};
+
+			drawingShadowWidth.onchange = function() {
+			   canvas.freeDrawingBrush.shadowBlur =  parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
+			};
+
+			if (canvas.freeDrawingBrush) {
+			    canvas.freeDrawingBrush.color = <HTMLInputElement>document.getElementById('drawing-color')
+			    canvas.freeDrawingBrush.width = parseInt((<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
+			    canvas.freeDrawingBrush.shadowBlur = 0;
+
 		    }
-		    else if (selectedCountry === 'vline') {
-		      canvas.freeDrawingBrush = hLinePatternBrush;
-		    }
-		    else if (selectedCountry === 'square') {
-		      canvas.freeDrawingBrush = squarePatternBrush;
-		    }
-		    else if (selectedCountry === 'diamond') {
-		      canvas.freeDrawingBrush = diamondPatternBrush;
-		    }
-		    else if (selectedCountry === 'texture') {
-		      canvas.freeDrawingBrush = texturePatternBrush;
-		    }
-		    else {
-		      canvas.freeDrawingBrush = new fabric[selectedCountry + 'Brush'](canvas);
-		    }
 
-		    if (canvas.freeDrawingBrush) {
-		      canvas.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;;
-		      canvas.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
-		      canvas.freeDrawingBrush.shadowBlur = parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
-		    }
-	    });
-
-		drawingColorEl.onchange = function() {
-		   canvas.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;
-		   console.log(JSON.stringify(canvas));
-
-		};
-
-		drawingLineWidthEl.onchange = function() {
-		   canvas.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
-		   console.log(JSON.stringify(canvas));
-
-		};
-
-		drawingShadowWidth.onchange = function() {
-		   canvas.freeDrawingBrush.shadowBlur =  parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
-		   console.log(JSON.stringify(canvas));
-
-		};
-
-		if (canvas.freeDrawingBrush) {
-		    canvas.freeDrawingBrush.color = <HTMLInputElement>document.getElementById('drawing-color')
-		    canvas.freeDrawingBrush.width = parseInt((<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
-		    canvas.freeDrawingBrush.shadowBlur = 0;
-		    console.log(JSON.stringify(canvas));
-
-	    }
-
-		var el = document.getElementById('canvas-background-picker');
-		if (el) {
-			addEventListener('change', function() {
-				var selectedBackground = $(this).children("canvas-background-picker").val();
-			    canvas.backgroundColor = selectedBackground;
-			    canvas.renderAll();
-			});			
-		}
+			var el = document.getElementById('canvas-background-picker');
+			if (el) {
+				addEventListener('change', function() {
+					var selectedBackground = $(this).children("canvas-background-picker").val();
+				    canvas.backgroundColor = selectedBackground;
+				    canvas.renderAll();
+				});			
+			}
 
   }
 }
