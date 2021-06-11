@@ -36,7 +36,7 @@
 			</div>
 		    <div>
 		    	<label class="w-100" for="drawing-color">Line color:</label>
-		    	<input type="color" value="#005E7A" id="drawing-color"><br>
+		    	<input type="color" id="drawing-color"><br>
 		    </div>
 		    <div>
 		    	<label class="w-100" for="drawing-shadow-width">Line shadow width:</label>
@@ -52,34 +52,37 @@
 			  <label class="form-check-label" for="flexSwitchCheckDefault">Update Images</label>
 			</div>
 			<div>
-				<button class="btn btn-md btn-outline-primary">Share <i class="fa fa-user"></i></button>	
+				<button class="btn btn-md btn-outline-primary" [disabled]="!canvasData || !canvasData.id" (click)="openShareWithModal(shareModal)">Share <i class="fa fa-user"></i></button>	
 			</div>
 		</div>
 	</div>
 </div>
 
-
-
-
-   
-<ng-template #mymodal let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-basic-title">Customize Your canvas</h4>
-    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
-      <span aria-hidden="true">×</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    This is example from ItSolutionStuff.com
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Ok</button>
-  </div>
-</ng-template>
-
 <div class="d-flex justify-content-center">
-	<canvas style="border: 1px solid grey; margin-left:20px;" height="700" width="1000" id="c"></canvas>
+	<canvas style="border: 1px solid grey; margin-left:20px;" height="700" width="1000" id="fabric-canvas"></canvas>
 </div>
 
 
-<!-- <img src="../../../assets/lione.png"> -->
+<ng-template #shareModal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-basic-title">Share Canvas</h4>
+	</div>
+	<div class="modal-body">
+		<form>
+			<div class="form-group">
+				<label for="email" class="mb-1">Email</label>
+				<input id="email" class="form-control" placeholder="Enter email" [(ngModel)]="shareWithEmail" name="email" #email="ngModel" email>
+				<div *ngIf="email.invalid && (email.dirty || email.touched)" class="text-danger">
+					<div *ngIf="email.errors?.email">
+						Email must be a valid format
+					</div>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button type="button" class="btn btn-light" (click)="modal.close('Save click')">Cancel</button>
+		<button [disabled]="!shareWithEmail || !shareWithEmail.length || email.errors || email.errors?.email" type="button" class="btn btn-outline-dark" (click)="shareCanvas()">Save</button>
+	</div>
+</ng-template>
+  

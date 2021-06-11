@@ -11,7 +11,7 @@ export class FirestoreService {
 
   /** Store Canvas To DB */
   public storeCanvas(userId: string, canvasString: string, email: string) {
-	const itemRef = this.db.object('item');
+	  const itemRef = this.db.object('usersCanvas/'+userId);
   	itemRef.set({
   		id: this.store.createId(),
   		canvas: canvasString,
@@ -22,16 +22,33 @@ export class FirestoreService {
 
   /** Get Login User Canvase */
   public getCanvas(userId: string): Observable<any> {
-     return this.db.object('item').valueChanges()
+     return this.db.object('usersCanvas/'+userId).valueChanges()
   }
 
   /** Share Canvas To External User*/
-  public shareCanvas(canvasId: string, recipentId: string) {
+  public async shareCanvas(canvasId: string, recipentEmailId: string) {
+    const dataInerted = false;
+    const configured_id = recipentEmailId.split('.').join("")
+    const ref = await this.db.object('sharedCanvas/'+configured_id)
+    ref.valueChanges().subscribe((data:any) => {
+      if(dataInerted) return;
 
+      let _data = data;
+      if(!data || !data.length) {
+        _data = [{canvasId: canvasId}]
+      } else {
+        const canvasAlreadyExists:boolean = _data.find((e)=>{
+          return e.canvasId === canvasId
+        })
+        if(!canvasAlreadyExists)
+          _data.push({canvasId: canvasId})
+      }
+      ref.set(_data)
+    });
   } 
 
   /** Retrive to login user shared canvas */
-  public getSharedCanvas(userId:string) {
+  public getSharedCanvas(emailId:string) {
 
   }
 }
