@@ -48,7 +48,8 @@ export class FirestoreService {
   } 
 
   /** Retrive to login user shared canvas */
-  public getSharedCanvas(emailId:string) {
-
+  public getSharedCanvas(emailId:string): Observable<any> {
+    const configured_id = emailId.split('.').join("")
+    return this.db.object('sharedCanvas/'+configured_id).valueChanges()
   }
 }

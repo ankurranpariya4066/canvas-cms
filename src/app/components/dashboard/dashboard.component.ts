@@ -17,16 +17,23 @@ export class DashbordComponent implements OnInit {
   canvasLoaded: boolean = false;
   shareWithEmail: string;
   modalRef:any;
+  sharedCanvases:any=[];
+  viewingSharedCanvasId:string;
+  canvasWrapper:any;
 
   constructor(public authService: FirbaseAuthService, private modalService: NgbModal, public firestoreService: FirestoreService) { }
 
   async ngOnInit() {
     this.user = JSON.parse(await localStorage.getItem('user'));
-  	this.getCanvas()
+	this.firestoreService.getSharedCanvas(this.user.email).subscribe((res)=>{
+		if(res && res.length)
+			this.sharedCanvases = res;
+	});
+  	this.getCanvas(this.user.uid)
   }
 
-  getCanvas() {
-  	this.firestoreService.getCanvas(this.user.uid).subscribe((data) => {
+  getCanvas(userId) {
+  	this.firestoreService.getCanvas(userId).subscribe((data) => {
 		this.canvasData = data;
 		if(this.canvasLoaded) return;
 		if(data && data.canvas){
@@ -40,28 +47,28 @@ export class DashbordComponent implements OnInit {
   }
  
   public loadCanvas(_canvas?:any){
-	var canvas = new fabric.Canvas('fabric-canvas');
+	this.canvasWrapper = new fabric.Canvas('fabric-canvas');
 	var drawingColorEl = document.getElementById('drawing-color'),
 	      drawingLineWidthEl = document.getElementById('drawing-line-width'),
 	      drawingShadowWidth = document.getElementById('drawing-shadow-width');
 
 	setTimeout(()=>{
-		canvas.isDrawingMode = true;
-		canvas.freeDrawingBrush.color = '#000000';
-		canvas.freeDrawingBrush.shadowBlur = 0;
+		this.canvasWrapper.isDrawingMode = true;
+		this.canvasWrapper.freeDrawingBrush.color = '#000000';
+		this.canvasWrapper.freeDrawingBrush.shadowBlur = 0;
 		if(_canvas)
-			canvas.loadFromJSON(_canvas, canvas.renderAll.bind(canvas), (o, object) => {
+		this.canvasWrapper.loadFromJSON(_canvas, this.canvasWrapper.renderAll.bind(this.canvasWrapper), (o, object) => {
 				fabric.log(o, object);
 			})
 
-		canvas.on('object:added', () => {
-			this.firestoreService.storeCanvas(this.user.uid, (JSON.stringify(canvas)), this.user.email);
+		this.canvasWrapper.on('object:added', () => {
+			this.firestoreService.storeCanvas(this.user.uid, (JSON.stringify(this.canvasWrapper)), this.user.email);
 		});
 		
 	})
 
 	if (fabric.PatternBrush) {
-	    var vLinePatternBrush = new fabric.PatternBrush(canvas);
+	    var vLinePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 
 	    vLinePatternBrush.getPatternSrc = function() {
 	      var patternCanvas = fabric.document.createElement('canvas');
@@ -77,7 +84,7 @@ export class DashbordComponent implements OnInit {
 	      return patternCanvas;
 	    };
 
-	    var hLinePatternBrush = new fabric.PatternBrush(canvas);
+	    var hLinePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 	    hLinePatternBrush.getPatternSrc = function() {
 	      var patternCanvas = fabric.document.createElement('canvas');
 	      patternCanvas.width = patternCanvas.height = 10;
@@ -93,7 +100,7 @@ export class DashbordComponent implements OnInit {
 	      return patternCanvas;
 	    };
 
-	    var squarePatternBrush = new fabric.PatternBrush(canvas);
+	    var squarePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 	    squarePatternBrush.getPatternSrc = function() {
 	      var squareWidth = 10, squareDistance = 2;
 	      var patternCanvas = fabric.document.createElement('canvas');
@@ -104,7 +111,7 @@ export class DashbordComponent implements OnInit {
 	      return patternCanvas;
 	    };
 
-	    var diamondPatternBrush = new fabric.PatternBrush(canvas);
+	    var diamondPatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 	    diamondPatternBrush.getPatternSrc = function() {
 	      var squareWidth = 10, squareDistance = 5;
 	      var patternCanvas = fabric.document.createElement('canvas');
@@ -124,16 +131,16 @@ export class DashbordComponent implements OnInit {
 	}
 
 	/* Custom Image Upload In Canvas */	
-	document.getElementById('imgLoader').onchange = function(event) {
+	document.getElementById('imgLoader').onchange = (event) => {
 			const target= event.target as HTMLInputElement;
 			const file: File = (target.files as FileList)[0];
 		
 			var reader = new FileReader();
-			reader.onload = function (event) { 				    
+			reader.onload = (event) => { 				    
 				var img = new Image();
 				img.src  =  event.target.result.toString();
 
-				img.onload = function(){
+				img.onload = () =>{
 					var image = new fabric.Image(img);
 					image.set({
 						left: 0,
@@ -142,64 +149,64 @@ export class DashbordComponent implements OnInit {
 						padding: 0,
 						cornersize: 0,
 					});
-					canvas.add(image);
-					canvas.isDrawingMode = false;
+					this.canvasWrapper.add(image);
+					this.canvasWrapper.isDrawingMode = false;
 				}
 			}
 			reader.readAsDataURL(file);
 	}
 
 	var img = new Image();
-	var texturePatternBrush = new fabric.PatternBrush(canvas);
+	var texturePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 	texturePatternBrush.source = img;
 
 	/* Select Drawing Option */
-	document.getElementById('drawing-mode-selector').addEventListener('change', function() {
+	document.getElementById('drawing-mode-selector').addEventListener('change', () => {
 		var selectedCountry = $(this).children("option:selected").val();
 
 		if (selectedCountry === 'hline') {
-			canvas.freeDrawingBrush = vLinePatternBrush;
+			this.canvasWrapper.freeDrawingBrush = vLinePatternBrush;
 		}
 		else if (selectedCountry === 'vline') {
-			canvas.freeDrawingBrush = hLinePatternBrush;
+			this.canvasWrapper.freeDrawingBrush = hLinePatternBrush;
 		}
 		else if (selectedCountry === 'square') {
-			canvas.freeDrawingBrush = squarePatternBrush;
+			this.canvasWrapper.freeDrawingBrush = squarePatternBrush;
 		}
 		else if (selectedCountry === 'diamond') {
-			canvas.freeDrawingBrush = diamondPatternBrush;
+			this.canvasWrapper.freeDrawingBrush = diamondPatternBrush;
 		}
 		else if (selectedCountry === 'texture') {
-			canvas.freeDrawingBrush = texturePatternBrush;
+			this.canvasWrapper.freeDrawingBrush = texturePatternBrush;
 		}
 		else {
-			canvas.freeDrawingBrush = new fabric[selectedCountry + 'Brush'](canvas);
+			this.canvasWrapper.freeDrawingBrush = new fabric[selectedCountry + 'Brush'](this.canvasWrapper);
 		}
 
-		if (canvas.freeDrawingBrush) {
-			canvas.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;;
-			canvas.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
-			canvas.freeDrawingBrush.shadowBlur = parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
+		if (this.canvasWrapper.freeDrawingBrush) {
+			this.canvasWrapper.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;;
+			this.canvasWrapper.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
+			this.canvasWrapper.freeDrawingBrush.shadowBlur = parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
 		}
 	});
 
 
-	drawingColorEl.onchange = function() {
-		canvas.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;
+	drawingColorEl.onchange = () => {
+		this.canvasWrapper.freeDrawingBrush.color = (<HTMLInputElement>document.getElementById('drawing-color')).value;
 	};
 
-	drawingLineWidthEl.onchange = function() {
-		canvas.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
+	drawingLineWidthEl.onchange = () => {
+		this.canvasWrapper.freeDrawingBrush.width = parseInt( (<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
 	};
 
-	drawingShadowWidth.onchange = function() {
-		canvas.freeDrawingBrush.shadowBlur =  parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
+	drawingShadowWidth.onchange = () => {
+		this.canvasWrapper.freeDrawingBrush.shadowBlur =  parseInt((<HTMLInputElement>document.getElementById('drawing-shadow-width')).value, 10) || 0;
 	};
 
-	if (canvas.freeDrawingBrush) {
-		canvas.freeDrawingBrush.color = <HTMLInputElement>document.getElementById('drawing-color')
-		canvas.freeDrawingBrush.width = parseInt((<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
-		canvas.freeDrawingBrush.shadowBlur = 0;
+	if (this.canvasWrapper.freeDrawingBrush) {
+		this.canvasWrapper.freeDrawingBrush.color = <HTMLInputElement>document.getElementById('drawing-color')
+		this.canvasWrapper.freeDrawingBrush.width = parseInt((<HTMLInputElement>document.getElementById('drawing-line-width')).value, 10) || 1;
+		this.canvasWrapper.freeDrawingBrush.shadowBlur = 0;
 	}
   }
   
@@ -209,10 +216,26 @@ export class DashbordComponent implements OnInit {
 
   async shareCanvas() {
 	try {
-		await this.firestoreService.shareCanvas(this.canvasData.id, this.shareWithEmail)
+		await this.firestoreService.shareCanvas(this.user.uid, this.shareWithEmail)
 		this.modalRef.close();
 	} catch(err) {
 		console.log(err);
 	}
+  }
+
+  renderSharedCanvas(userId) {
+	this.canvasLoaded = false;
+	this.canvasWrapper.clear()
+	this.viewingSharedCanvasId = userId;
+	this.canvasWrapper.isDrawingMode = false;
+	this.getCanvas(userId)
+  }
+
+  showMyCanvas(){
+	this.canvasWrapper.clear()
+	this.viewingSharedCanvasId = null;
+	this.canvasWrapper.isDrawingMode = true;
+	this.canvasLoaded = false;
+	this.getCanvas(this.user.uid)
   }
 }

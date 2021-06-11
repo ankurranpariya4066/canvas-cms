@@ -14,52 +14,73 @@
 </nav>
 
  <div class="container-fluid">
-	<div class="row" style="border:1px solid grey; margin-top:10px; margin-bottom:10px; padding:10px">
-		<div class="col-6 d-flex align-items-center justify-content-between">
-			<div class="form-group w-25">
-				<label for="drawing-mode-selector">Mode</label>
-				<select class="form-control" id="drawing-mode-selector">
-					<option>Pencil</option>
-					<option>Circle</option>
-					<option>Spray</option>
-					<option>Pattern</option>
-					<option>hline</option>
-					<option>vline</option>
-					<option>square</option>
-					<option>diamond</option>
-					<option>texture</option>
-				</select>
-			</div>
-			<div>
-				<label class="w-100" for="drawing-line-width">Line width:</label>
-		    	<input type="range" value="30" min="0" max="150" id="drawing-line-width"><br>
-			</div>
-		    <div>
-		    	<label class="w-100" for="drawing-color">Line color:</label>
-		    	<input type="color" id="drawing-color"><br>
-		    </div>
-		    <div>
-		    	<label class="w-100" for="drawing-shadow-width">Line shadow width:</label>
-		    	<input type="range" value="0" min="0" max="50" id="drawing-shadow-width"><br>
-		    </div>
-		</div>
-		<div class="col-6 d-flex align-items-center justify-content-end">
-			<div style="margin-right:10px">
-				<input class="form-control" type="file" id="imgLoader"> 	
-			</div>
-			<div class="form-check form-switch" style="margin-right:10px">
-			  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
-			  <label class="form-check-label" for="flexSwitchCheckDefault">Update Images</label>
-			</div>
-			<div>
-				<button class="btn btn-md btn-outline-primary" [disabled]="!canvasData || !canvasData.id" (click)="openShareWithModal(shareModal)">Share <i class="fa fa-user"></i></button>	
+	<div class="row p-3">
+		<div class="col-12" style="box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);">
+			<div class="row p-2">
+				<div class="col-6 d-flex align-items-center justify-content-between">
+					<div class="form-group w-25">
+						<label for="drawing-mode-selector">Mode</label>
+						<select class="form-control" id="drawing-mode-selector">
+							<option>Pencil</option>
+							<option>Circle</option>
+							<option>Spray</option>
+							<option>Pattern</option>
+							<option>hline</option>
+							<option>vline</option>
+							<option>square</option>
+							<option>diamond</option>
+							<option>texture</option>
+						</select>
+					</div>
+					<div>
+						<label class="w-100" for="drawing-line-width">Line width:</label>
+						<input type="range" value="30" min="0" max="150" id="drawing-line-width"><br>
+					</div>
+					<div>
+						<label class="w-100" for="drawing-color">Line color:</label>
+						<input type="color" id="drawing-color"><br>
+					</div>
+					<div>
+						<label class="w-100" for="drawing-shadow-width">Line shadow width:</label>
+						<input type="range" value="0" min="0" max="50" id="drawing-shadow-width"><br>
+					</div>
+				</div>
+				<div class="col-6 d-flex align-items-center justify-content-end">
+					<div style="margin-right:10px">
+						<input class="form-control" type="file" id="imgLoader"> 	
+					</div>
+					<div class="form-check form-switch" style="margin-right:10px">
+					  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+					  <label class="form-check-label" for="flexSwitchCheckDefault">Update Images</label>
+					</div>
+					<div>
+						<button class="btn btn-md btn-outline-primary" [disabled]="!canvasData || !canvasData.id || viewingSharedCanvasId" (click)="openShareWithModal(shareModal)">Share <i class="fa fa-user"></i></button>	
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
-</div>
-
-<div class="d-flex justify-content-center">
-	<canvas style="border: 1px solid grey; margin-left:20px;" height="700" width="1000" id="fabric-canvas"></canvas>
+	<div class="row">
+		<div class="col-9">
+			<canvas style="border: 1px solid grey; margin-left:20px;" height="700" width="1400" id="fabric-canvas"></canvas>
+		</div>
+		<div class="col-3">
+			<div class="card">
+				<div class="card-header text-bold">
+					Shared With Me
+				</div>
+				<div class="card-body">
+					<div class="list-group" id="list-tab" role="tablist">
+						<div class="list-group-item list-group-item-action" [ngClass]="(!viewingSharedCanvasId || !viewingSharedCanvasId.length) ? 'active' : ''" (click)="showMyCanvas()">Show My Canvas</div>
+						<div class="list-group-item list-group-item-action" [ngClass]="viewingSharedCanvasId === canvas.canvasId ? 'active' : ''" *ngFor="let canvas of sharedCanvases" id="list-home-list" data-toggle="list" role="tab" aria-controls="home" (click)="renderSharedCanvas(canvas.canvasId)">{{canvas.canvasId}}</div>
+						<ng-container *ngIf="!sharedCanvases || !sharedCanvases.length">
+							<p class="text-center mt-3">No Canvas Found</p>
+						</ng-container>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 
