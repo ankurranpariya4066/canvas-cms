@@ -1,0 +1,85 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-md-auto gap-2">
+        <li class="nav-item rounded">
+          <button class="btn btn-primary" type="button" (click)="authService.SignOut()"><i class="fa fa-google mr-2"></i>Logout</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+ <div class="container-fluid">
+	<div class="row" style="border:1px solid grey; margin-top:10px; margin-bottom:10px; padding:10px">
+		<div class="col-6 d-flex align-items-center justify-content-between">
+			<div class="form-group w-25">
+				<label for="drawing-mode-selector">Mode</label>
+				<select class="form-control" id="drawing-mode-selector">
+					<option>Pencil</option>
+					<option>Circle</option>
+					<option>Spray</option>
+					<option>Pattern</option>
+					<option>hline</option>
+					<option>vline</option>
+					<option>square</option>
+					<option>diamond</option>
+					<option>texture</option>
+				</select>
+			</div>
+			<div>
+				<label class="w-100" for="drawing-line-width">Line width:</label>
+		    	<input type="range" value="30" min="0" max="150" id="drawing-line-width"><br>
+			</div>
+		    <div>
+		    	<label class="w-100" for="drawing-color">Line color:</label>
+		    	<input type="color" value="#005E7A" id="drawing-color"><br>
+		    </div>
+		    <div>
+		    	<label class="w-100" for="drawing-shadow-width">Line shadow width:</label>
+		    	<input type="range" value="0" min="0" max="50" id="drawing-shadow-width"><br>
+		    </div>
+		</div>
+		<div class="col-6 d-flex align-items-center justify-content-end">
+			<div style="margin-right:10px">
+				<input class="form-control" type="file" id="imgLoader"> 	
+			</div>
+			<div class="form-check form-switch" style="margin-right:10px">
+			  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
+			  <label class="form-check-label" for="flexSwitchCheckDefault">Update Images</label>
+			</div>
+			<div>
+				<button class="btn btn-md btn-outline-primary">Share <i class="fa fa-user"></i></button>	
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+   
+<ng-template #mymodal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">Customize Your canvas</h4>
+    <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">×</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    This is example from ItSolutionStuff.com
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="modal.close('Save click')">Ok</button>
+  </div>
+</ng-template>
+
+<div class="d-flex justify-content-center">
+	<canvas style="border: 1px solid grey; margin-left:20px;" height="700" width="1000" id="c"></canvas>
+</div>
+
+
+<!-- <img src="../../../assets/lione.png"> -->
