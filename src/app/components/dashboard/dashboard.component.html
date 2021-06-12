@@ -48,15 +48,18 @@
 					</div>
 				</div>
 				<div class="col-lg-6 col-md-12 col-sm-12 d-md-block d-lg-flex align-items-center justify-content-end">
-					<div style="margin-right:10px">
+					<div style="margin-right:5px">
 						<input class="form-control" type="file" id="imgLoader"> 	
 					</div>
-					<div class="form-check form-switch" style="margin-right:10px">
+					<div class="form-check form-switch" style="margin-right:5px">
 					  <input class="form-check-input" type="checkbox" id="flexSwitchCheckDefault">
 					  <label class="form-check-label" for="flexSwitchCheckDefault">Update Images</label>
 					</div>
+					<div style="margin-right:5px">
+						<button class="btn btn-md btn-outline-primary" [disabled]="!canvasData || !canvasData.id || viewingSharedCanvasId" (click)="openShareWithModal(shareModal)">Share <i class="fa fa-user"></i></button>
+					</div>
 					<div>
-						<button class="btn btn-md btn-outline-primary" [disabled]="!canvasData || !canvasData.id || viewingSharedCanvasId" (click)="openShareWithModal(shareModal)">Share <i class="fa fa-user"></i></button>	
+						<button class="btn btn-md btn-outline-danger" [disabled]="!canvasData || !canvasData.id || viewingSharedCanvasId" (click)="clearnCanvas()">Clear <i class="fa fa-user"></i></button>	
 					</div>
 				</div>
 			</div>

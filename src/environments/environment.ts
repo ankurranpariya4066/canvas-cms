@@ -5,12 +5,12 @@
 export const environment = {
   production: false,
   firebaseConfig : {
-    apiKey: "AIzaSyC1jB1EJxZAac_O0_QiFjwml-p7R33lPFk",
-    authDomain: "th-test-a8c49.firebaseapp.com",
-    projectId: "th-test-a8c49",
-    storageBucket: "th-test-a8c49.appspot.com",
-    messagingSenderId: "182536863001",
-    appId: "1:182536863001:web:b4fcc023c9639a2d70d988"
+    apiKey: "AIzaSyCxJZscQmwWoX0-9_jXl58tBpcX8bhTc90",
+    authDomain: "canvascms1947.firebaseapp.com",
+    projectId: "canvascms1947",
+    storageBucket: "canvascms1947.appspot.com",
+    messagingSenderId: "1081562783608",
+    appId: "1:1081562783608:web:4ec4fb183385643582b28d"
   }
 };
 

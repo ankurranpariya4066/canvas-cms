@@ -1,4 +1,4 @@
-import { Component, OnInit,  HostListener } from '@angular/core';
+import { Component, OnInit,  HostListener, ComponentFactoryResolver } from '@angular/core';
 import { FirbaseAuthService } from "../../services/firebase/firbase-auth.service";
 import { FirestoreService } from '../../services/firebase/firestore.service';
 import $ from 'jquery';
@@ -54,20 +54,19 @@ export class DashbordComponent implements OnInit {
 		this.canvasWrapper = new fabric.Canvas('fabric-canvas');
 			this.canvasWrapper.setHeight(700);
 			this.canvasWrapper.setWidth(1400);
+
 		var drawingColorEl = document.getElementById('drawing-color'),
 			drawingLineWidthEl = document.getElementById('drawing-line-width'),
 			drawingShadowWidth = document.getElementById('drawing-shadow-width');
 			this.canvasWrapper.isDrawingMode = true;
-
 		setTimeout(()=>{
 			this.canvasWrapper.isDrawingMode = true;
 			this.canvasWrapper.freeDrawingBrush.color = '#000000';
 			this.canvasWrapper.freeDrawingBrush.shadowBlur = 0;
 			if(_canvas)
-			this.canvasWrapper.loadFromJSON(_canvas, this.canvasWrapper.renderAll.bind(this.canvasWrapper), (o, object) => {
+				this.canvasWrapper.loadFromJSON(_canvas, this.canvasWrapper.renderAll.bind(this.canvasWrapper), (o, object) => {
 					fabric.log(o, object);
 				})
-
 			this.canvasWrapper.on('object:added', () => {
 				this.firestoreService.storeCanvas(this.user.uid, (JSON.stringify(this.canvasWrapper)), this.user.email);
 			});
@@ -78,62 +77,62 @@ export class DashbordComponent implements OnInit {
 			var vLinePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 
 			vLinePatternBrush.getPatternSrc = function() {
-			var patternCanvas = fabric.document.createElement('canvas');
-			patternCanvas.width = patternCanvas.height = 10;
-			var ctx = patternCanvas.getContext('2d');
-			ctx.strokeStyle = this.color;
-			ctx.lineWidth = 5;
-			ctx.beginPath();
-			ctx.moveTo(0, 5);
-			ctx.lineTo(10, 5);
-			ctx.closePath();
-			ctx.stroke();
-			return patternCanvas;
+				var patternCanvas = fabric.document.createElement('canvas');
+				patternCanvas.width = patternCanvas.height = 10;
+				var ctx = patternCanvas.getContext('2d');
+				ctx.strokeStyle = this.color;
+				ctx.lineWidth = 5;
+				ctx.beginPath();
+				ctx.moveTo(0, 5);
+				ctx.lineTo(10, 5);
+				ctx.closePath();
+				ctx.stroke();
+				return patternCanvas;
 			};
 
 			var hLinePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 			hLinePatternBrush.getPatternSrc = function() {
-			var patternCanvas = fabric.document.createElement('canvas');
-			patternCanvas.width = patternCanvas.height = 10;
-			var ctx = patternCanvas.getContext('2d');
-			ctx.strokeStyle = this.color;
-			ctx.lineWidth = 5;
-			ctx.beginPath();
-			ctx.moveTo(5, 0);
-			ctx.lineTo(5, 10);
-			ctx.closePath();
-			ctx.stroke();
+				var patternCanvas = fabric.document.createElement('canvas');
+				patternCanvas.width = patternCanvas.height = 10;
+				var ctx = patternCanvas.getContext('2d');
+				ctx.strokeStyle = this.color;
+				ctx.lineWidth = 5;
+				ctx.beginPath();
+				ctx.moveTo(5, 0);
+				ctx.lineTo(5, 10);
+				ctx.closePath();
+				ctx.stroke();
 
-			return patternCanvas;
+				return patternCanvas;
 			};
 
 			var squarePatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 			squarePatternBrush.getPatternSrc = function() {
-			var squareWidth = 10, squareDistance = 2;
-			var patternCanvas = fabric.document.createElement('canvas');
-			patternCanvas.width = patternCanvas.height = squareWidth + squareDistance;
-			var ctx = patternCanvas.getContext('2d');
-			ctx.fillStyle = this.color;
-			ctx.fillRect(0, 0, squareWidth, squareWidth);
-			return patternCanvas;
+				var squareWidth = 10, squareDistance = 2;
+				var patternCanvas = fabric.document.createElement('canvas');
+				patternCanvas.width = patternCanvas.height = squareWidth + squareDistance;
+				var ctx = patternCanvas.getContext('2d');
+				ctx.fillStyle = this.color;
+				ctx.fillRect(0, 0, squareWidth, squareWidth);
+				return patternCanvas;
 			};
 
 			var diamondPatternBrush = new fabric.PatternBrush(this.canvasWrapper);
 			diamondPatternBrush.getPatternSrc = function() {
-			var squareWidth = 10, squareDistance = 5;
-			var patternCanvas = fabric.document.createElement('canvas');
-			var rect = new fabric.Rect({
-				width: squareWidth,
-				height: squareWidth,
-				angle: 45,
-				fill: this.color
-			});
-			var canvasWidth = rect.getBoundingRectWidth();
-			patternCanvas.width = patternCanvas.height = canvasWidth + squareDistance;
-			rect.set({ left: canvasWidth / 2, top: canvasWidth / 2 });
-			var ctx = patternCanvas.getContext('2d');
-			rect.render(ctx);
-			return patternCanvas;
+				var squareWidth = 10, squareDistance = 5;
+				var patternCanvas = fabric.document.createElement('canvas');
+				var rect = new fabric.Rect({
+					width: squareWidth,
+					height: squareWidth,
+					angle: 45,
+					fill: this.color
+				});
+				var canvasWidth = rect.getBoundingRectWidth();
+				patternCanvas.width = patternCanvas.height = canvasWidth + squareDistance;
+				rect.set({ left: canvasWidth / 2, top: canvasWidth / 2 });
+				var ctx = patternCanvas.getContext('2d');
+				rect.render(ctx);
+				return patternCanvas;
 			};
 		}
 
@@ -259,5 +258,10 @@ export class DashbordComponent implements OnInit {
 		const zoom  = this.canvasWrapper.getZoom() * scale;
 		this.canvasWrapper.setDimensions({width: containerWidth, height: containerWidth / ratio});
 		this.canvasWrapper.setViewportTransform([zoom, 0, 0, zoom, 0, 0]);
+	}
+
+	clearnCanvas() {
+		this.canvasWrapper.clear()
+		this.firestoreService.storeCanvas(this.user.uid, (JSON.stringify(this.canvasWrapper)), this.user.email);
 	}
 }
